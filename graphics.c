@@ -15,17 +15,16 @@ void draw_pixel(char* buffer, int x, int y){
 
 
 /*draw line*/
-//TODO check for vertical and horizontal lines
 void draw_line(char* buffer, int x1, int y1, int x2, int y2){
 	int w = x2-x1+1;
 	int h = y2-y1+1;	
 	if(w > h){
 		for(int i=0; i<w; i++){
-			draw_pixel(buffer, (x1+i) % SSD1306_LCDWIDTH, (i/(w/h))%SSD1306_LCDHEIGHT);
+			draw_pixel(buffer, (x1+i) % SSD1306_LCDWIDTH, y1+(i/(w/h))%SSD1306_LCDHEIGHT);
 		}
 	}else{
 		for(int i=0; i<h; i++)
-			draw_pixel(buffer, (i/(h/w)) % SSD1306_LCDWIDTH, (y1+i)%SSD1306_LCDHEIGHT);
+			draw_pixel(buffer, x1+(i/(h/w)) % SSD1306_LCDWIDTH, (y1+i)%SSD1306_LCDHEIGHT);
 	}
 }
 
@@ -74,17 +73,26 @@ void draw_circle(char* buffer, int x0, int y0, int radius){
 
 
 /*draw bitmap mapped in left to right top tp bottom MSB to LSB format*/
-void draw_bmp(char* buffer, char* bmp, int width, int height, int x){
+void draw_bmp(char* buffer, char* bmp, int width, int height, int x, int y){
 	
-	for(int i=0; i<height/8; i++){
+	for(int i=0; i<height; i++){
 		for(int j=0; j<width; j++){
-			for(int k=0; k<8; k++){
-				int bufferIndex=(j+i*SSD1306_LCDWIDTH+x)%(SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8);
-				buffer[bufferIndex ]|= ((bmp[j/8+k*width/8+i*width] & (0b10000000>>(j%8))) << j%8 >> (7-k));
-			}
+			int bufferIndex=(j+x+(i+y)/8*SSD1306_LCDWIDTH) % (SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8);
+			buffer[bufferIndex ]|= ( (bmp[j/8+(i*width)/8] & (0b10000000>>(j%8))) << j%8 >> (7-(i+y)%8) );
 		}
 	}
 }
 
 
+
+/*draw xbm bitmap*/
+void draw_xbm(char* buffer, char* xbm, int width, int height, int x, int y){
+
+	for(int i=0; i<height; i++){
+		for(int j=0; j<width; j++){
+			int bufferIndex=(j+x+(i+y)/8*SSD1306_LCDWIDTH) % (SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8);
+			buffer[bufferIndex ]|= ( (xbm[j/8+(i*width)/8] & (0b00000001<<(j%8))) >> j%8 << (i+y)%8 );
+		}
+	}
+}
 

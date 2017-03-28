@@ -17,5 +17,8 @@ void draw_box(char* buffer, int x, int y, int width, int height);
 
 void draw_circle(char* buffer, int x0, int y0, int radius);
 
+void draw_bmp(char* buffer, char* bmp, int width, int height, int x, int y);
+
+void draw_xbm(char* buffer, char* xbm, int width, int height, int x, int y);
 
 #endif
